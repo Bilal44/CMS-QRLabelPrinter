@@ -8,6 +8,7 @@ using CMS_QRLabelPrinter.Models;
 using System.Data.SqlClient;
 using QRCoder;
 using System.Drawing;
+using System.Drawing.Printing;
 
 namespace CMS_QRLabelPrinter.Controllers
 {
@@ -33,6 +34,11 @@ namespace CMS_QRLabelPrinter.Controllers
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(@"https://mywebsite.com/" + qrText, QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
             bit = qrCode.GetGraphic(20);
+
+            PrintDocument pd = new PrintDocument();
+            pd.PrintPage += PrintPage;
+            pd.Print();
+            pd.Dispose();
 
             string jobKeyID = qrText.Substring(0, 8);
             string itemKeyID = qrText.Substring(8);
@@ -68,5 +74,13 @@ namespace CMS_QRLabelPrinter.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        #region Helper
+        private void PrintPage(object o, PrintPageEventArgs e)
+        {
+               e.Graphics.DrawImage(bit, 0, 0, bit.Height / 3, bit.Width / 3);
+
+        }
+        #endregion
     }
 }

@@ -27,3 +27,20 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $("#btnCustomer").click(function () {
+        $.ajax({
+            type: "POST",
+            url: "Home/CustomerInfo",
+            data: { "qrText": $("#qrText").val() },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    });
+</script>

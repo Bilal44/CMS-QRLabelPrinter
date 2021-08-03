@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS-QRLabelPrinter", "CMS-QRLabelPrinter\CMS-QRLabelPrinter.csproj", "{409020C0-ED37-4695-B36F-F23B832A1B84}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{409020C0-ED37-4695-B36F-F23B832A1B84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{409020C0-ED37-4695-B36F-F23B832A1B84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{409020C0-ED37-4695-B36F-F23B832A1B84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{409020C0-ED37-4695-B36F-F23B832A1B84}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {024539A8-C3C5-4309-ABF5-2C06FC492CDC}
+	EndGlobalSection
+EndGlobal

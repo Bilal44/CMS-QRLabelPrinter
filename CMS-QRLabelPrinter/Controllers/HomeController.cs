@@ -78,7 +78,7 @@ namespace CMS_QRLabelPrinter.Controllers
         #region Helper
         private void PrintPage(object o, PrintPageEventArgs e)
         {
-               e.Graphics.DrawImage(bit, 0, 0, bit.Height / 3, bit.Width / 3);
+               e.Graphics.DrawImage(bit, 0, 0, bit.Height / 5, bit.Width / 5);
 
         }
         #endregion

@@ -1,0 +1,58 @@
+Production Table (Task 1)
+=========================
+
+CREATE TABLE [dbo].[Production] (
+    [ID] INT NOT NULL,
+    [JobKeyID]  INT NOT NULL,
+    [ItemKeyID] INT NOT NULL,
+    [ProductName] NVARCHAR(50) NOT NULL,
+    PRIMARY KEY ([ID])
+);
+
+
+Heading Table (Task 1)
+======================
+
+CREATE TABLE [dbo].[Heading] (
+    [JobKeyID]  INT NOT NULL,
+    [DateInProduction] DATE NOT NULL,
+    PRIMARY KEY ([JobKeyID])
+);
+
+
+QRTable (Task 1)
+================
+
+CREATE TABLE [dbo].[QRTable] (
+    [JobKeyID]  INT NOT NULL,
+    [ItemKeyID] INT NOT NULL,
+    [ScanDate] DATETIME NOT NULL,
+    CONSTRAINT ScanID PRIMARY KEY ([JobKeyID], [ItemKeyID])
+);
+
+
+INSERTING DATA IN Heading Table (Task 1)
+========================================
+
+INSERT INTO Heading VALUES (1, '2021-08-02');
+INSERT INTO Heading VALUES (2, '2021-08-02');
+INSERT INTO Heading VALUES (3, '2021-08-02');
+INSERT INTO Heading VALUES (4, '2021-08-02');
+INSERT INTO Heading VALUES (5, '2021-08-03');
+INSERT INTO Heading VALUES (6, '2021-08-03');
+INSERT INTO Heading VALUES (7, '2021-08-04');
+INSERT INTO Heading VALUES (8, '2021-08-05');
+
+
+Query SQL Data (Task 2)
+=======================
+
+SELECT COUNT(CASE WHEN ProductName LIKE '%Door%' THEN 1 END) AS DoorTotal,
+    COUNT(CASE WHEN ProductName LIKE '%Reversible%' OR ProductName LIKE '%Casement%' THEN 1 END) AS WindowTotal,
+	DateInProduction,
+	MONTH(DateInProduction) AS Month,
+	YEAR(DateInProduction) AS Year
+FROM Production p JOIN Heading h
+ON p.JobKeyID = h.JobKeyID
+WHERE h.DateInProduction = '2021-08-03'
+group by DateInProduction

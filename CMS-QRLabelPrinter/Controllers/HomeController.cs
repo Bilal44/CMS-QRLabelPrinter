@@ -69,6 +69,22 @@ namespace CMS_QRLabelPrinter.Controllers
             return View();
         }
 
+        [HttpPost]
+        public IActionResult CustomerInfo(string qrText)
+        {
+            if (!string.IsNullOrWhiteSpace(qrText) && qrText.Length == 11)
+            {
+                customerInfo = true;
+                PrintDocument pd = new PrintDocument();
+                pd.PrintPage += PrintPage;
+                pd.Print();
+                pd.Dispose();
+                return View();
+            }
+
+            return StatusCode(400, "Error: Invalid Job and/or Item ID.");
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

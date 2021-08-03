@@ -105,7 +105,7 @@ namespace CMS_QRLabelPrinter.Controllers
             if (customerInfo)
             {
                 e.Graphics.DrawString("Castlecary Road 1\n" +
-                    "CMS Enviro Ltd", new Font("Calibri", 15), Brushes.Black, 175.0f, 75.0f);
+                    "CMS Enviro Ltd", new Font("Calibri", 15), Brushes.Black, 150.0f, 60.0f);
             }
 
         }

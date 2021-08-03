@@ -29,16 +29,7 @@ namespace CMS_QRLabelPrinter.Controllers
         {
 
             customerInfo = false;
-
-            QRCodeGenerator qrGenerator = new QRCodeGenerator();
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(@"https://mywebsite.com/" + qrText, QRCodeGenerator.ECCLevel.Q);
-            QRCode qrCode = new QRCode(qrCodeData);
-            bit = qrCode.GetGraphic(20);
-
-            PrintDocument pd = new PrintDocument();
-            pd.PrintPage += PrintPage;
-            pd.Print();
-            pd.Dispose();
+            GenerateQRCode(qrText);
 
             string jobKeyID = qrText.Substring(0, 8);
             string itemKeyID = qrText.Substring(8);
@@ -75,11 +66,9 @@ namespace CMS_QRLabelPrinter.Controllers
             if (!string.IsNullOrWhiteSpace(qrText) && qrText.Length == 11)
             {
                 customerInfo = true;
-                PrintDocument pd = new PrintDocument();
-                pd.PrintPage += PrintPage;
-                pd.Print();
-                pd.Dispose();
-                return View();
+                GenerateQRCode(qrText);
+                Print();
+                return StatusCode(200);
             }
 
             return StatusCode(400, "Error: Invalid Job and/or Item ID.");
@@ -91,7 +80,24 @@ namespace CMS_QRLabelPrinter.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        #region Helper
+        #region Helpers
+
+        private void GenerateQRCode(string qrText)
+        {
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(@"https://mywebsite.com/" + qrText, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new QRCode(qrCodeData);
+            bit = qrCode.GetGraphic(20);
+        }
+
+        private void Print()
+        {
+            PrintDocument pd = new PrintDocument();
+            pd.PrintPage += PrintPage;
+            pd.Print();
+            pd.Dispose();
+        }
+
         private void PrintPage(object o, PrintPageEventArgs e)
         {
             e.Graphics.DrawImage(bit, 0, 0, bit.Height / 5, bit.Width / 5);

@@ -94,7 +94,13 @@ namespace CMS_QRLabelPrinter.Controllers
         #region Helper
         private void PrintPage(object o, PrintPageEventArgs e)
         {
-               e.Graphics.DrawImage(bit, 0, 0, bit.Height / 5, bit.Width / 5);
+            e.Graphics.DrawImage(bit, 0, 0, bit.Height / 5, bit.Width / 5);
+
+            if (customerInfo)
+            {
+                e.Graphics.DrawString("Castlecary Road 1\n" +
+                    "CMS Enviro Ltd", new Font("Calibri", 15), Brushes.Black, 175.0f, 75.0f);
+            }
 
         }
         #endregion

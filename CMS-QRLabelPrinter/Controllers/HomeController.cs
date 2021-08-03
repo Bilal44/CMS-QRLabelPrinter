@@ -18,11 +18,22 @@ namespace CMS_QRLabelPrinter.Controllers
         Bitmap bit = null; // Global variable to store QR code as a bitmap image
         bool customerInfo = false; // Variable to determine whether to print additional customer info
 
+        /// <summary>
+        /// Default index page displaying one input box for the IDs and two separate buttons for printing out
+        /// QR codes without or without the accompanying customer's address.
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             return View();
         }
 
+        /// <summary>
+        /// POST function to receive the submitted form, print the QR Code and break down the
+        /// provided number into JobKeyID and ItemKeyID and save them into the database along
+        /// with the time of scan.
+        /// </summary>
+        /// <param name="qrText">Barcode to be converted and printed in QR format</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Index(string qrText)
@@ -30,12 +41,15 @@ namespace CMS_QRLabelPrinter.Controllers
 
             customerInfo = false;
             GenerateQRCode(qrText);
+            PrintQRCode();
 
             string jobKeyID = qrText.Substring(0, 8);
             string itemKeyID = qrText.Substring(8);
 
+            // Local database path
             string constr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CMS_db;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
+            // SQL command to insert the already parsed and split ID keys along with current DateTime in QRTable
             using (SqlConnection conn = new SqlConnection(constr))
             {
                 string query = "INSERT INTO [QRTable] (JobKeyID, ItemKeyID, ScanDate) VALUES (" + jobKeyID + ", " + itemKeyID + ", GETDATE())";
@@ -60,14 +74,20 @@ namespace CMS_QRLabelPrinter.Controllers
             return View();
         }
 
+        /// <summary>
+        /// POST function to repond to AJAX function allowing the user to print QR code
+        /// along with customer's name and address. No changes will be saved into the database.
+        /// </summary>
+        /// <param name="qrText">Barcode to be converted and printed in QR format</param>
         [HttpPost]
         public IActionResult CustomerInfo(string qrText)
         {
+            // Perform a validation check to make sure it is a valid ID combination before proceeding to print
             if (!string.IsNullOrWhiteSpace(qrText) && qrText.Length == 11)
             {
                 customerInfo = true;
                 GenerateQRCode(qrText);
-                Print();
+                PrintQRCode();
                 return StatusCode(200);
             }
 
@@ -82,6 +102,10 @@ namespace CMS_QRLabelPrinter.Controllers
 
         #region Helpers
 
+        /// <summary>
+        /// QR generator helper function powered by QRCoder library
+        /// </summary>
+        /// <param name="qrText">Barcode to be converted and printed in QR format</param>
         private void GenerateQRCode(string qrText)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
@@ -90,7 +114,10 @@ namespace CMS_QRLabelPrinter.Controllers
             bit = qrCode.GetGraphic(20);
         }
 
-        private void Print()
+        /// <summary>
+        /// QR printer sending the command to the default printer
+        /// </summary>
+        private void PrintQRCode()
         {
             PrintDocument pd = new PrintDocument();
             pd.PrintPage += PrintPage;
@@ -98,10 +125,14 @@ namespace CMS_QRLabelPrinter.Controllers
             pd.Dispose();
         }
 
+        /// <summary>
+        /// Print the page with or without the customer information depending on the 'customerInfo' boolean
+        /// </summary>
         private void PrintPage(object o, PrintPageEventArgs e)
         {
             e.Graphics.DrawImage(bit, 0, 0, bit.Height / 5, bit.Width / 5);
 
+            // Add customer's name and address to the print out if required by the user
             if (customerInfo)
             {
                 e.Graphics.DrawString("Castlecary Road 1\n" +

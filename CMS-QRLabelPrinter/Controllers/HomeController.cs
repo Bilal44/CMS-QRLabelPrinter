@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CMS_QRLabelPrinter.Models;
 using System.Data.SqlClient;
@@ -38,40 +35,46 @@ namespace CMS_QRLabelPrinter.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Index(string qrText)
         {
-
-            customerInfo = false;
-            GenerateQRCode(qrText);
-            PrintQRCode();
-
-            string jobKeyID = qrText.Substring(0, 8);
-            string itemKeyID = qrText.Substring(8);
-
-            // Local database path
-            string constr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CMS_db;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-
-            // SQL command to insert the already parsed and split ID keys along with current DateTime in QRTable
-            using (SqlConnection conn = new SqlConnection(constr))
+            // Perform a validation check to make sure it is a valid ID combination before proceeding to print
+            if (!string.IsNullOrWhiteSpace(qrText) && qrText.Length == 11)
             {
-                string query = "INSERT INTO [QRTable] (JobKeyID, ItemKeyID, ScanDate) VALUES (" + jobKeyID + ", " + itemKeyID + ", GETDATE())";
 
-                using (SqlCommand cmd = new SqlCommand(query))
+                customerInfo = false;
+
+                uint jobKeyID = Convert.ToUInt32(qrText.Substring(0, 8));
+                uint itemKeyID = Convert.ToUInt16(qrText.Substring(8));
+                GenerateQRCode(jobKeyID, itemKeyID);
+                PrintQRCode();
+
+                // Local database path
+                string constr = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=CMS_db;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+
+                // SQL command to insert the already parsed and split ID keys along with current DateTime in QRTable
+                using (SqlConnection conn = new SqlConnection(constr))
                 {
-                    cmd.Connection = conn;
+                    string query = $"INSERT INTO [QRTable] (JobKeyID, ItemKeyID, ScanDate) VALUES ({jobKeyID}, {itemKeyID}, GETDATE())";
 
-                    try
+                    using (SqlCommand cmd = new SqlCommand(query))
                     {
-                        conn.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                    catch (SqlException e)
-                    {
-                        return Content("SQL Error: " + e.Message.ToString());
-                    }
+                        cmd.Connection = conn;
 
+                        try
+                        {
+                            conn.Open();
+                            cmd.ExecuteNonQuery();
+                        }
+                        catch (SqlException e)
+                        {
+                            return Content("SQL Error: " + e.Message.ToString());
+                        }
+
+                    }
                 }
+
+                return View();
             }
 
-            return View();
+            return Content("Barcode Error: The barcode should only contain exactly 11 digits.");
         }
 
         /// <summary>
@@ -86,7 +89,9 @@ namespace CMS_QRLabelPrinter.Controllers
             if (!string.IsNullOrWhiteSpace(qrText) && qrText.Length == 11)
             {
                 customerInfo = true;
-                GenerateQRCode(qrText);
+                uint jobKeyID = Convert.ToUInt32(qrText.Substring(0, 8));
+                uint itemKeyID = Convert.ToUInt16(qrText.Substring(8));
+                GenerateQRCode(jobKeyID, itemKeyID);
                 PrintQRCode();
                 return StatusCode(200);
             }
@@ -105,11 +110,12 @@ namespace CMS_QRLabelPrinter.Controllers
         /// <summary>
         /// QR generator helper function powered by QRCoder library
         /// </summary>
-        /// <param name="qrText">Barcode to be converted and printed in QR format</param>
-        private void GenerateQRCode(string qrText)
+        /// <param name="jobKeyID">Job ID taken from the barcode</param>
+        /// <param name="itemKeyID">Item ID parsed from the barcode</param>
+        private void GenerateQRCode(uint jobKeyID, uint itemKeyID)
         {
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(@"https://mywebsite.com/" + qrText, QRCodeGenerator.ECCLevel.Q);
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode($@"https://mywebsite.com/QRCode?JobKeyID={jobKeyID}&ItemKeyID={itemKeyID}", QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
             bit = qrCode.GetGraphic(20);
         }
@@ -136,7 +142,7 @@ namespace CMS_QRLabelPrinter.Controllers
             if (customerInfo)
             {
                 e.Graphics.DrawString("Castlecary Road 1\n" +
-                    "CMS Enviro Ltd", new Font("Calibri", 15), Brushes.Black, 150.0f, 60.0f);
+                    "CMS Enviro Ltd", new Font("Calibri", 15, FontStyle.Bold), Brushes.Black, 170.0f, 60.0f);
             }
 
         }
